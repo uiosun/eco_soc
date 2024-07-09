@@ -1,0 +1,8 @@
+# cache directory
+.vs/
+.idea/
+logfile
+.$config.drawio.bkp
+
+# config
+env-*
