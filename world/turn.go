@@ -34,11 +34,11 @@ func (w *World) Turn() {
 			info += fmt.Sprintf("%d 正在 %s\n", human.Id, a.Name)
 			switch a.Name {
 			case gp.ActionEnumEat:
-				human.Eat()
+				info += human.Eat()
 			case gp.ActionEnumSleep:
-				human.Sleep()
+				info += human.Sleep()
 			case gp.ActionEnumForage:
-				human.Forage()
+				info += human.Forage()
 			}
 		}
 		human.History = append(human.History, info)

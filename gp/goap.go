@@ -21,15 +21,17 @@ func (ae ActionEnum) String() string {
 }
 
 var (
-	ActionEnumSleep          = ActionEnum(1)
-	ActionEnumEat            = ActionEnum(2)
-	ActionEnumForage         = ActionEnum(3)
-	ActionEnumSetMarketOrder = ActionEnum(4)
-	ActionEnums              = map[ActionEnum]string{
-		ActionEnumEat:            "小麦",
-		ActionEnumSleep:          "休息",
-		ActionEnumForage:         "收集食物",
-		ActionEnumSetMarketOrder: "设置订单",
+	ActionEnumSleep    = ActionEnum(1)
+	ActionEnumEat      = ActionEnum(2)
+	ActionEnumForage   = ActionEnum(3)
+	ActionEnumSellFood = ActionEnum(4)
+	ActionEnumBuyFood  = ActionEnum(5)
+	ActionEnums        = map[ActionEnum]string{
+		ActionEnumEat:      "小麦",
+		ActionEnumSleep:    "休息",
+		ActionEnumForage:   "收集食物",
+		ActionEnumSellFood: "出售食物",
+		ActionEnumBuyFood:  "购买食物",
 	}
 )
 

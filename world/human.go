@@ -21,6 +21,18 @@ type Human struct {
 	History []string
 }
 
+func (h *Human) BaseInfo() []string {
+	return []string{
+		h.CanCollectFood(false),
+		h.NotHasMarketOrder(false),
+		fmt.Sprintf("age=%d", h.Age),
+		fmt.Sprintf("cash=%d", h.Cash),
+		fmt.Sprintf("hunger=%d", h.Hunger),
+		fmt.Sprintf("tired=%d", h.Tired),
+		fmt.Sprintf("food=%v", h.Bag[GoodsTypeWheat]),
+	}
+}
+
 func (h *Human) CanCollectFood(demo bool) string {
 	if demo || h.State&1 == 1 {
 		return "can_collect_food=1"
@@ -28,27 +40,39 @@ func (h *Human) CanCollectFood(demo bool) string {
 	return "!can_collect_food"
 }
 
-func (h *Human) HasMarketOrder(demo bool) string {
-	if demo || h.State&2 == 2 {
-		return "has_market_order=1"
+func (h *Human) NotHasMarketOrder(demo bool) string {
+	if demo || h.State&2 != 2 {
+		return "!not_has_market_order"
 	}
-	return "!has_market_order"
+	return "not_has_market_order=1"
+}
+
+func (h *Human) WantCash() string {
+	wantCash := 0.0
+	if h.Cash < 50 {
+		wantCash = 50
+	} else {
+		wantCash = float64(h.Cash)
+	}
+	return fmt.Sprintf("cash>%d", int(wantCash*1.2))
 }
 
 func (h *Human) Think() string {
 	goals := []*goap.State{
 		goap.StateOf("food>80", h.CanCollectFood(true)),
-		goap.StateOf("cash>50"),
+		goap.StateOf(h.WantCash()),
 	}
 	info := ""
 
 	info += fmt.Sprintf("%d 在思考做些什么……", h.Id)
-	init := goap.StateOf("hunger=80", "!food", "!tired", h.CanCollectFood(false))
+	init := goap.StateOf(h.BaseInfo()...)
 	goal := goals[rand.Intn(len(goals))]
 	actions := []goap.Action{
 		gp.NewAction(h.Id, 1, gp.ActionEnumEat, "food>0", "hunger-50,food-5"),
-		gp.NewAction(h.Id, 1, gp.ActionEnumForage, fmt.Sprintf("tired<50,%s", h.CanCollectFood(true)), "tired+20,food+10,hunger+5"),
+		gp.NewAction(h.Id, 1, gp.ActionEnumForage, fmt.Sprintf("tired<60,%s", h.CanCollectFood(true)), "tired+20,food+10,hunger+5"),
 		gp.NewAction(h.Id, 2, gp.ActionEnumSleep, "tired>45", "tired-30"),
+		gp.NewAction(h.Id, 2, gp.ActionEnumSellFood, fmt.Sprintf("tired<60,%s", h.NotHasMarketOrder(true)), "tired+15,not_has_market_order=1"),
+		gp.NewAction(h.Id, 2, gp.ActionEnumBuyFood, "!can_collect_food", "cash-20,food+5"),
 	}
 	plan, err := goap.Plan(init, goal, actions)
 	if err != nil {
@@ -99,7 +123,7 @@ func (h *Human) Sleep() string {
 func (h *Human) Forage() string {
 	info := ""
 
-	if h.Tired < 50 {
+	if h.Tired < 60 {
 		h.Tired += 20
 		h.Hunger += 5
 		findCount := 10
